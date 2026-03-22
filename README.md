@@ -77,7 +77,7 @@ use procmod_layout::{GameStruct, Process};
 #[derive(GameStruct)]
 struct CombatState {
     #[offset(0x50)]
-    is_attacking: bool,
+    is_attacking: u8,
     #[offset(0x54)]
     combo_count: u32,
     #[offset(0x60)]
@@ -119,11 +119,11 @@ fn find_inventory(process: &Process, module: &[u8], module_base: usize) -> procm
 
 ## Supported types
 
-Any type that is `Copy` and valid for any bit pattern works as a field type:
+All field types must be `Copy` and valid for any bit pattern. Types with validity invariants (`bool`, `char`, enums) must not be used - read them as their underlying integer type instead (e.g., `u8` for booleans).
 
-- Primitives: `u8`, `u16`, `u32`, `u64`, `i8`, `i16`, `i32`, `i64`, `f32`, `f64`, `bool`, `usize`
+- Numeric primitives: `u8`, `u16`, `u32`, `u64`, `i8`, `i16`, `i32`, `i64`, `f32`, `f64`, `usize`
 - Fixed-size arrays: `[f32; 3]`, `[u8; 16]`, etc.
-- Any `#[repr(C)]` struct that is `Copy`
+- Any `#[repr(C)]` struct that is `Copy` and valid for any bit pattern
 
 ## License
 

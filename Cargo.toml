@@ -1,6 +1,6 @@
 [package]
 name = "procmod-layout"
-version = "1.0.0"
+version = "1.0.1"
 edition = "2021"
 description = "Struct mapping with pointer chain traversal via derive macros"
 license = "MIT"

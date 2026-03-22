@@ -212,11 +212,11 @@ mod tests {
     }
 
     #[test]
-    fn read_bool_field() {
+    fn read_u8_as_flag() {
         #[derive(GameStruct, Debug)]
-        struct WithBool {
+        struct WithFlag {
             #[offset(0)]
-            alive: bool,
+            alive: u8,
             #[offset(4)]
             score: u32,
         }
@@ -227,9 +227,27 @@ mod tests {
 
         let process = self_process();
         let base = buf.as_ptr() as usize;
-        let result = WithBool::read(&process, base).unwrap();
-        assert!(result.alive);
+        let result = WithFlag::read(&process, base).unwrap();
+        assert!(result.alive != 0);
         assert_eq!(result.score, 100);
+    }
+
+    #[test]
+    fn pointer_chain_null_pointer() {
+        #[derive(GameStruct, Debug)]
+        #[allow(dead_code)]
+        struct NullChain {
+            #[offset(0)]
+            #[pointer_chain(0)]
+            value: u32,
+        }
+
+        // base holds a null pointer
+        let null_ptr: usize = 0;
+        let process = self_process();
+        let base = &null_ptr as *const usize as usize;
+        let result = NullChain::read(&process, base);
+        assert!(result.is_err());
     }
 
     #[test]
