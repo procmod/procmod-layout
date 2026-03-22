@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <rect width="256" height="256" rx="16" fill="#111"/>
+  <!-- struct frame - a bracket showing mapped layout -->
+  <rect x="56" y="40" width="144" height="176" rx="8" fill="none" stroke="#334155" stroke-width="2"/>
+  <!-- field slots at specific offsets -->
+  <rect x="72" y="56" width="112" height="24" rx="4" fill="#f97316"/>
+  <rect x="72" y="92" width="112" height="24" rx="4" fill="#38bdf8"/>
+  <rect x="72" y="128" width="112" height="24" rx="4" fill="#38bdf8"/>
+  <!-- pointer chain field -->
+  <rect x="72" y="164" width="72" height="24" rx="4" fill="#a78bfa"/>
+  <!-- pointer arrow from chain field to external target -->
+  <line x1="144" y1="176" x2="176" y2="176" stroke="#a78bfa" stroke-width="2" stroke-linecap="round"/>
+  <line x1="176" y1="176" x2="176" y2="144" stroke="#a78bfa" stroke-width="2" stroke-linecap="round"/>
+  <line x1="176" y1="144" x2="216" y2="144" stroke="#a78bfa" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="216" cy="144" r="4" fill="#a78bfa"/>
+  <!-- offset tick marks on the left -->
+  <line x1="44" y1="68" x2="56" y2="68" stroke="#555" stroke-width="1"/>
+  <line x1="44" y1="104" x2="56" y2="104" stroke="#555" stroke-width="1"/>
+  <line x1="44" y1="140" x2="56" y2="140" stroke="#555" stroke-width="1"/>
+  <line x1="44" y1="176" x2="56" y2="176" stroke="#555" stroke-width="1"/>
+</svg>
