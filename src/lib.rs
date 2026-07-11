@@ -118,11 +118,11 @@ mod tests {
 
     #[test]
     fn read_single_field() {
-        let value: f32 = 3.14;
+        let value: f32 = 3.125;
         let process = self_process();
         let base = &value as *const f32 as usize;
         let result = SingleField::read(&process, base).unwrap();
-        assert!((result.value - 3.14).abs() < f32::EPSILON);
+        assert!((result.value - 3.125).abs() < f32::EPSILON);
     }
 
     #[test]
@@ -139,14 +139,14 @@ mod tests {
         let mut buf = [0u8; 16];
         buf[0] = 0xFF;
         buf[4..8].copy_from_slice(&42u32.to_ne_bytes());
-        buf[8..16].copy_from_slice(&2.718f64.to_ne_bytes());
+        buf[8..16].copy_from_slice(&2.625f64.to_ne_bytes());
 
         let process = self_process();
         let base = buf.as_ptr() as usize;
         let result = MixedTypes::read(&process, base).unwrap();
         assert_eq!(result.byte_val, 0xFF);
         assert_eq!(result.int_val, 42);
-        assert!((result.float_val - 2.718).abs() < f64::EPSILON);
+        assert!((result.float_val - 2.625).abs() < f64::EPSILON);
     }
 
     #[test]
@@ -248,6 +248,36 @@ mod tests {
         let base = &null_ptr as *const usize as usize;
         let result = NullChain::read(&process, base);
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn direct_offset_overflow_is_reported() {
+        #[derive(GameStruct)]
+        #[allow(dead_code)]
+        struct Overflow {
+            #[offset(1)]
+            value: u8,
+        }
+
+        let process = self_process();
+        let result = Overflow::read(&process, usize::MAX);
+        assert!(matches!(result, Err(Error::AddressOverflow)));
+    }
+
+    #[test]
+    fn pointer_chain_offset_overflow_is_reported() {
+        #[derive(GameStruct)]
+        #[allow(dead_code)]
+        struct Overflow {
+            #[offset(0)]
+            #[pointer_chain(1)]
+            value: u8,
+        }
+
+        let pointer = usize::MAX;
+        let process = self_process();
+        let result = Overflow::read(&process, &pointer as *const usize as usize);
+        assert!(matches!(result, Err(Error::AddressOverflow)));
     }
 
     #[test]
