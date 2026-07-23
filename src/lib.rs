@@ -32,7 +32,7 @@
 // when this crate is being compiled (including in tests)
 extern crate self as procmod_layout;
 
-pub use procmod_core::{Error, Process, Result};
+pub use procmod_core::{Address, Capability, Error, Process, ReadOnly, ReadWrite, Result};
 pub use procmod_layout_derive::GameStruct;
 
 #[cfg(test)]
@@ -95,7 +95,7 @@ mod tests {
     fn read_simple_layout() {
         let data: [u32; 2] = [42, 99];
         let process = self_process();
-        let base = data.as_ptr() as usize;
+        let base = Address::new(data.as_ptr() as usize as u64);
         let result = SimpleLayout::read(&process, base).unwrap();
         assert_eq!(result.a, 42);
         assert_eq!(result.b, 99);
@@ -110,7 +110,7 @@ mod tests {
         buf[16..24].copy_from_slice(&second.to_ne_bytes());
 
         let process = self_process();
-        let base = buf.as_ptr() as usize;
+        let base = Address::new(buf.as_ptr() as usize as u64);
         let result = WithGap::read(&process, base).unwrap();
         assert_eq!(result.first, 0xDEAD_BEEF);
         assert_eq!(result.second, 0xCAFE_BABE);
@@ -120,7 +120,7 @@ mod tests {
     fn read_single_field() {
         let value: f32 = 3.125;
         let process = self_process();
-        let base = &value as *const f32 as usize;
+        let base = Address::new(&value as *const f32 as usize as u64);
         let result = SingleField::read(&process, base).unwrap();
         assert!((result.value - 3.125).abs() < f32::EPSILON);
     }
@@ -129,7 +129,7 @@ mod tests {
     fn read_array_field() {
         let data: [u32; 4] = [10, 20, 30, 40];
         let process = self_process();
-        let base = data.as_ptr() as usize;
+        let base = Address::new(data.as_ptr() as usize as u64);
         let result = ArrayField::read(&process, base).unwrap();
         assert_eq!(result.values, [10, 20, 30, 40]);
     }
@@ -142,7 +142,7 @@ mod tests {
         buf[8..16].copy_from_slice(&2.625f64.to_ne_bytes());
 
         let process = self_process();
-        let base = buf.as_ptr() as usize;
+        let base = Address::new(buf.as_ptr() as usize as u64);
         let result = MixedTypes::read(&process, base).unwrap();
         assert_eq!(result.byte_val, 0xFF);
         assert_eq!(result.int_val, 42);
@@ -163,7 +163,7 @@ mod tests {
         buf[8..8 + std::mem::size_of::<usize>()].copy_from_slice(&target_ptr.to_ne_bytes());
 
         let process = self_process();
-        let base = buf.as_ptr() as usize;
+        let base = Address::new(buf.as_ptr() as usize as u64);
         let result = WithPointerChain::read(&process, base).unwrap();
         assert_eq!(result.direct, 999);
         assert_eq!(result.through_ptr, 12345);
@@ -185,7 +185,7 @@ mod tests {
         // base holds a pointer to mid_ptr, which holds a pointer to target
         let base_data: usize = mid_ptr;
         let process = self_process();
-        let base = &base_data as *const usize as usize;
+        let base = Address::new(&base_data as *const usize as usize as u64);
         let result = MultiHop::read(&process, base).unwrap();
         assert_eq!(result.value, 0xBEEF);
     }
@@ -206,7 +206,7 @@ mod tests {
 
         // base level: pointer to level2
         let process = self_process();
-        let base = &level2_addr as *const usize as usize;
+        let base = Address::new(&level2_addr as *const usize as usize as u64);
         let result = OffsetChain::read(&process, base).unwrap();
         assert_eq!(result.value, 7777);
     }
@@ -226,7 +226,7 @@ mod tests {
         buf[4..8].copy_from_slice(&100u32.to_ne_bytes());
 
         let process = self_process();
-        let base = buf.as_ptr() as usize;
+        let base = Address::new(buf.as_ptr() as usize as u64);
         let result = WithFlag::read(&process, base).unwrap();
         assert!(result.alive != 0);
         assert_eq!(result.score, 100);
@@ -245,7 +245,7 @@ mod tests {
         // base holds a null pointer
         let null_ptr: usize = 0;
         let process = self_process();
-        let base = &null_ptr as *const usize as usize;
+        let base = Address::new(&null_ptr as *const usize as usize as u64);
         let result = NullChain::read(&process, base);
         assert!(result.is_err());
     }
@@ -260,7 +260,7 @@ mod tests {
         }
 
         let process = self_process();
-        let result = Overflow::read(&process, usize::MAX);
+        let result = Overflow::read(&process, Address::new(u64::MAX));
         assert!(matches!(result, Err(Error::AddressOverflow)));
     }
 
@@ -276,7 +276,10 @@ mod tests {
 
         let pointer = usize::MAX;
         let process = self_process();
-        let result = Overflow::read(&process, &pointer as *const usize as usize);
+        let result = Overflow::read(
+            &process,
+            Address::new(&pointer as *const usize as usize as u64),
+        );
         assert!(matches!(result, Err(Error::AddressOverflow)));
     }
 
@@ -292,7 +295,7 @@ mod tests {
 
         let data: [i32; 2] = [-50, -100];
         let process = self_process();
-        let base = data.as_ptr() as usize;
+        let base = Address::new(data.as_ptr() as usize as u64);
         let result = Signed::read(&process, base).unwrap();
         assert_eq!(result.x, -50);
         assert_eq!(result.y, -100);

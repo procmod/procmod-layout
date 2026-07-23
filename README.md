@@ -14,7 +14,7 @@ Map remote process memory into Rust structs. Declare byte offsets on each field,
 
 ```toml
 [dependencies]
-procmod-layout = "1"
+procmod-layout = "2"
 ```
 
 ## Quick start
@@ -96,7 +96,7 @@ struct CombatState {
 Use [procmod-scan](https://github.com/procmod/procmod-scan) to find a structure's base address after a game update, then read it with a layout:
 
 ```rust
-use procmod_layout::{GameStruct, Process};
+use procmod_layout::{Address, Capability, GameStruct, Process};
 use procmod_scan::Pattern;
 
 #[derive(GameStruct)]
@@ -109,10 +109,10 @@ struct Inventory {
     weight: f32,
 }
 
-fn find_inventory(process: &Process, module: &[u8], module_base: usize) -> procmod_layout::Result<Inventory> {
+fn find_inventory<C: Capability>(process: &Process<C>, module: &[u8], module_base: Address) -> procmod_layout::Result<Inventory> {
     let sig = Pattern::from_ida("48 8D 0D ? ? ? ? E8 ? ? ? ? 48 8B D8").unwrap();
     let offset = sig.scan_first(module).expect("inventory signature not found");
-    let base = module_base + offset;
+    let base = module_base.checked_add(offset as u64)?;
     Inventory::read(process, base)
 }
 ```
@@ -121,7 +121,7 @@ fn find_inventory(process: &Process, module: &[u8], module_base: usize) -> procm
 
 All field types must be `Copy` and valid for any bit pattern. Types with validity invariants (`bool`, `char`, enums) must not be used - read them as their underlying integer type instead (e.g., `u8` for booleans).
 
-- Numeric primitives: `u8`, `u16`, `u32`, `u64`, `i8`, `i16`, `i32`, `i64`, `f32`, `f64`, `usize`
+- Numeric primitives: `u8`, `u16`, `u32`, `u64`, `i8`, `i16`, `i32`, `i64`, `f32`, `f64`
 - Fixed-size arrays: `[f32; 3]`, `[u8; 16]`, etc.
 - Any `#[repr(C)]` struct that is `Copy` and valid for any bit pattern
 

@@ -1,6 +1,6 @@
 [package]
 name = "procmod-layout"
-version = "1.0.2"
+version = "2.0.0"
 edition = "2021"
 description = "Struct mapping with pointer chain traversal via derive macros"
 license = "MIT"
@@ -9,5 +9,5 @@ keywords = ["struct", "memory", "game", "modding", "derive"]
 categories = ["game-development"]
 
 [dependencies]
-procmod-core = "1"
-procmod-layout-derive = "1"
+procmod-core = { version = "2", path = "../core" }
+procmod-layout-derive = { version = "2", path = "../layout-derive" }
