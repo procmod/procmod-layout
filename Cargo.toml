@@ -9,5 +9,5 @@ keywords = ["struct", "memory", "game", "modding", "derive"]
 categories = ["game-development"]
 
 [dependencies]
-procmod-core = { version = "2", path = "../core" }
-procmod-layout-derive = { version = "2", path = "../layout-derive" }
+procmod-core = "2"
+procmod-layout-derive = "2"

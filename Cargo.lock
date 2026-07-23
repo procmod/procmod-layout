@@ -20,6 +20,8 @@ dependencies = [
 [[package]]
 name = "procmod-core"
 version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3de0cd7fcee8daece7bbad9fb2ba202ab926a8354745a13f152584221341be55"
 dependencies = [
  "libc",
  "thiserror",
@@ -37,6 +39,8 @@ dependencies = [
 [[package]]
 name = "procmod-layout-derive"
 version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0de53a49a2b3b4ca0b2424a4bb0e4253223bedb83c401c55782594800551910a"
 dependencies = [
  "proc-macro2",
  "quote",
